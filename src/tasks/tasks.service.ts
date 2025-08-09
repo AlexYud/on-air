@@ -63,9 +63,9 @@ export class TasksService {
       const updatedTask = await this.prisma.task.update({
         where: { id },
         data: {
-          name: updateTaskDto.name,
-          description: updateTaskDto.description,
-          completed: updateTaskDto.completed,
+          name: updateTaskDto?.name ? updateTaskDto.name : findTask.name,
+          description: updateTaskDto?.description ? updateTaskDto.description : findTask.description,
+          completed: updateTaskDto?.completed ? updateTaskDto.completed : findTask.completed,
         },
       });
       return updatedTask;
