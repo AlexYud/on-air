@@ -17,6 +17,7 @@ export class TasksService {
       });
       return tasks;
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new HttpException('Error fetching tasks', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -33,6 +34,7 @@ export class TasksService {
 
       return task;
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new HttpException(`Error fetching task with id ${id}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -48,6 +50,7 @@ export class TasksService {
       });
       return newTask;
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new HttpException('Error creating task', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -70,6 +73,7 @@ export class TasksService {
       });
       return updatedTask;
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new HttpException(`Error updating task with id ${id}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -87,6 +91,7 @@ export class TasksService {
       });
       return deletedTask;
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new HttpException(`Error deleting task with id ${id}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

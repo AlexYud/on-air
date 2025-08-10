@@ -2,10 +2,14 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user-dto';
 import { UpdateUserDto } from './dto/update-user-dto';
+import { HashingServiceProtocol } from 'src/auth/hash/hashing.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    private readonly hashingService: HashingServiceProtocol,
+  ) { }
 
   async findOne(id: number) {
     try {
@@ -29,11 +33,12 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto) {
     try {
+      const password = await this.hashingService.hashPassword(createUserDto.password);
       const user = await this.prisma.user.create({
         data: {
           name: createUserDto.name,
           email: createUserDto.email,
-          password: createUserDto.password,
+          password: password,
         },
         select: {
           id: true,
@@ -43,6 +48,7 @@ export class UsersService {
       });
       return user;
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       throw new HttpException('Error creating user', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -55,11 +61,20 @@ export class UsersService {
       if (!user) {
         throw new HttpException(`User with id ${id} not found`, HttpStatus.NOT_FOUND);
       }
+
+      const dataUser: { name?: string, password?: string } = {
+        name: updateUserDto.name ? updateUserDto.name : (user.name ?? ''),
+      }
+
+      if (updateUserDto?.password) {
+        dataUser['password'] = await this.hashingService.hashPassword(updateUserDto.password);
+      }
+
       const updatedUser = await this.prisma.user.update({
         where: { id },
         data: {
-          name: updateUserDto.name ? updateUserDto.name : user.name,
-          password: updateUserDto.password ? updateUserDto.password : user.password,
+          name: dataUser.name,
+          password: dataUser?.password ? dataUser.password : user.password,
         },
         select: {
           id: true,
