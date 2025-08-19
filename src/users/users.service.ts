@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user-dto';
 import { UpdateUserDto } from './dto/update-user-dto';
 import { HashingServiceProtocol } from 'src/auth/hash/hashing.service';
+import { PayloadTokenDto } from 'src/auth/dto/payload-token.dto';
 
 @Injectable()
 export class UsersService {
@@ -53,13 +54,17 @@ export class UsersService {
     }
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: number, updateUserDto: UpdateUserDto, tokenPayload: PayloadTokenDto) {
     try {
       const user = await this.prisma.user.findUnique({
         where: { id },
       });
       if (!user) {
         throw new HttpException(`User with id ${id} not found`, HttpStatus.NOT_FOUND);
+      }
+
+      if (user.id !== tokenPayload.sub) {
+        throw new HttpException('You can only update your own user', HttpStatus.FORBIDDEN);
       }
 
       const dataUser: { name?: string, password?: string } = {
