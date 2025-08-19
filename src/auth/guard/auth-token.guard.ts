@@ -4,11 +4,13 @@ import { Request } from "express";
 import jwtConfig from "../config/jwt.config";
 import type { ConfigType } from "@nestjs/config";
 import { REQUEST_TOKEN_PAYLOAD_NAME } from "../common/auth.constant";
+import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()
 export class AuthTokenGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
+    private readonly prisma: PrismaService,
 
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
@@ -23,7 +25,11 @@ export class AuthTokenGuard implements CanActivate {
     try {
       const payload = await this.jwtService.verifyAsync(token, this.jwtConfiguration);
       request[REQUEST_TOKEN_PAYLOAD_NAME] = payload;
-
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
+      });
+      if (!user) throw new UnauthorizedException('User not found');
+      if (!user.active) throw new UnauthorizedException('User not active');
     } catch (error) {
       throw new UnauthorizedException('Invalid token');
     }
