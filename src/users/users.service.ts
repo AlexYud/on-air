@@ -94,14 +94,20 @@ export class UsersService {
     }
   }
 
-  async delete(id: number) {
+  async delete(id: number, tokenPayload: PayloadTokenDto) {
     try {
       const user = await this.prisma.user.findUnique({
         where: { id },
       });
+
       if (!user) {
         throw new HttpException(`User with id ${id} not found`, HttpStatus.NOT_FOUND);
       }
+
+      if (user.id !== tokenPayload.sub) {
+        throw new HttpException('You can only delete your own user', HttpStatus.FORBIDDEN);
+      }
+
       await this.prisma.user.delete({
         where: { id },
       });

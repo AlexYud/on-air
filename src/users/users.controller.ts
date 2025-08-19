@@ -30,8 +30,11 @@ export class UsersController {
     return this.usersService.update(id, updateUserDto, tokenPayload);
   }
 
+  @UseGuards(AuthTokenGuard)
   @Delete(':id')
-  deleteUser(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.delete(id);
+  deleteUser(
+    @Param('id', ParseIntPipe) id: number,
+    @TokenPayloadParam() tokenPayload: PayloadTokenDto) {
+    return this.usersService.delete(id, tokenPayload);
   }
 }
