@@ -58,11 +58,10 @@ export class AuthService {
           id: user.id,
           name: user.name,
           email: user.email,
+          avatar: user.avatar,
         },
       };
     } catch (error) {
-      console.log('Authentication error:', error);
-
       if (error instanceof HttpException) throw error;
       throw new HttpException('Error during authentication', HttpStatus.INTERNAL_SERVER_ERROR);
     }
