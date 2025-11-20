@@ -1,9 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user-dto';
 import { UpdateUserDto } from './dto/update-user-dto';
-import { HashingServiceProtocol } from 'src/auth/hash/hashing.service';
-import { PayloadTokenDto } from 'src/auth/dto/payload-token.dto';
+import { HashingServiceProtocol } from '../auth/hash/hashing.service';
+import { PayloadTokenDto } from '../auth/dto/payload-token.dto';
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
 
@@ -127,7 +127,7 @@ export class UsersService {
       const fileName = `${tokenPayload.sub}.${fileExtension}`;
       const fileLocale = path.resolve(process.cwd(), 'files', fileName);
       await fs.writeFile(fileLocale, file.buffer);
-      const user = await this.prisma.user.findFirst({
+      const user = await this.prisma.user.findUnique({
         where: { id: tokenPayload.sub },
       });
       if (!user) {
