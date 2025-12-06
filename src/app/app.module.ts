@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule, Req, RequestMethod } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TasksModule } from 'src/tasks/tasks.module';
@@ -12,7 +12,10 @@ import { join } from 'path';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`
+    }),
     TasksModule,
     UsersModule,
     OpenaiModule,
